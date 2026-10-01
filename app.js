@@ -4,19 +4,26 @@ const money=n=>"$"+Number(n||0).toLocaleString();
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const L="ABCD";
 /* ---- sound (WebAudio, no files) ---- */
-let ac=null,muted=false,mi=0,mt=null;
-function tone(f,t=0,d=.2,type="sine",v=.12){if(!ac||muted)return;const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime+t;
-  o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g).connect(ac.destination);o.start(n);o.stop(n+d)}
-const sfx={bid:()=>tone(660,0,.12,"triangle"),sold:()=>{tone(220,0,.15,"square",.08);tone(440,.12,.25,"triangle")},
-  ding:()=>{tone(784,0,.15);tone(1047,.12,.35)},buzz:()=>tone(140,0,.45,"sawtooth",.1),
-  win:()=>[523,659,784,1047].forEach((f,i)=>tone(f,i*.13,.35))};
-const MEL=[392,494,587,494,440,523,659,523];
-function startAudio(){if(!ac){ac=new (window.AudioContext||window.webkitAudioContext)()}ac.resume();
-  if(!mt)mt=setInterval(()=>tone(MEL[mi++%8],0,.4,"sine",.025),420)}
-function toggleSound(){muted=!muted;$("snd").textContent=muted?"🔇":"🔊"}
+let ac=null,sfxOn=true,musicOn=true,step=0,mt=null;
+function tone(f,t=0,d=.2,type="sine",v=.12,music=false){if(!ac||(music?!musicOn:!sfxOn))return;
+  const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime+t;
+  o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.0001,n);g.gain.linearRampToValueAtTime(v,n+.02);
+  g.gain.exponentialRampToValueAtTime(.0001,n+d);o.connect(g).connect(ac.destination);o.start(n);o.stop(n+d+.05)}
+const sfx={bid:()=>tone(660,0,.12,"triangle",.2),sold:()=>{tone(220,0,.15,"square",.1);tone(440,.12,.25,"triangle",.2)},
+  ding:()=>{tone(784,0,.18,"sine",.25);tone(1047,.12,.4,"sine",.25)},buzz:()=>tone(140,0,.5,"sawtooth",.15),
+  win:()=>[523,659,784,1047].forEach((f,i)=>tone(f,i*.13,.4,"sine",.25))};
+const CH=[[261.63,329.63,392],[220,261.63,329.63],[174.61,220,261.63],[196,246.94,293.66]],BASS=[130.81,110,87.31,98.0],PAT=[0,1,2,1,0,2,1,2];
+function startAudio(){try{if(!ac){ac=new (window.AudioContext||window.webkitAudioContext)()}ac.resume();
+  if(!mt)mt=setInterval(()=>{const c=Math.floor(step/8)%4;
+    tone(CH[c][PAT[step%8]]*2,0,.4,"triangle",.07,true);
+    if(step%4===0)tone(BASS[c],0,1,"sine",.1,true);
+    if(step%8===0)tone(CH[c][0],0,1.6,"sine",.04,true);step++},280)}catch(e){console.warn("audio off",e)}}
+document.addEventListener("click",()=>{if(ac&&ac.state==="suspended")ac.resume()});
+function toggleSound(){sfxOn=!sfxOn;$("snd").textContent=sfxOn?"🔊":"🔇"}
+function toggleMusic(){musicOn=!musicOn;$("mus").textContent=musicOn?"🎵":"🚫";startAudio()}
 /* ---- screens ---- */
 function show(id){["start","join","rules","game"].forEach(x=>$(x).classList.toggle("hidden",x!==id))}
-function showJoin(){startAudio();show("join")}
+function showJoin(){show("join");startAudio()}
 function connect(){
   const proto=location.protocol==="https:"?"wss":"ws";
   ws=new WebSocket(`${proto}://${location.host}/ws/${encodeURIComponent(room)}/${role}`);
@@ -28,9 +35,9 @@ function connect(){
     if(m.type==="state"){prev=latest;latest=m.state;render()}};
 }
 function join(){myName=($("name").value||"").trim();if(!myName){alert("Please enter a nickname.");return}
-  role="student";room=($("room").value||"FA2026").trim().toUpperCase();connect();show("rules")}
+  role="student";room=($("room").value||"FA2026").trim().toUpperCase();startAudio();connect();show("rules")}
 function host(){const p=prompt("Host password (leave empty if running locally):");if(p===null)return;hostPw=p.trim();
-  role="host";myName="HOST";room=($("room").value||"FA2026").trim().toUpperCase();connect();show("game")}
+  role="host";myName="HOST";room=($("room").value||"FA2026").trim().toUpperCase();startAudio();connect();show("game")}
 function ready(){show("game")}
 function send(action,extra={}){if(ws&&ws.readyState===1)ws.send(JSON.stringify({action,...extra}))}
 const bid=a=>send("bid",{amount:a});
