@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Finance Auction — Topic 15</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#1e50d8;--deep:#173fa8;--org:#ffb066;--org2:#ffd2a1;--ink:#14161f}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--blue);font-family:Fredoka,"Arial Rounded MT Bold","Trebuchet MS",sans-serif;font-weight:600;
+background:radial-gradient(ellipse 40% 18% at 20% 14%,#fff8 0,#fff0 70%),radial-gradient(ellipse 35% 15% at 80% 30%,#fff7 0,#fff0 70%),
+linear-gradient(#f7cdbb 0,#d3ecc4 28%,#a8d8ee 50%,#3b72dc 62%,var(--deep) 100%) fixed}
+body:after{content:"";position:fixed;left:0;right:0;bottom:0;height:34vh;z-index:-1;opacity:.5;
+background:repeating-radial-gradient(circle at 50% 120%,#fff0 0 22px,#ffffff30 23px 26px)}
+.hidden{display:none!important}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 24px}
+header b{font-size:22px;letter-spacing:.5px}
+.top{display:flex;gap:10px;align-items:center}
+.wrap{max-width:1180px;margin:auto;padding:6px 20px 40px}
+.card{background:var(--org);border:3px solid var(--ink);border-radius:26px;padding:20px;margin-bottom:18px}
+.card.white{background:#ffffffd9}
+h1,h2,h3{margin:0 0 8px}
+.big{font-size:clamp(48px,9vw,104px);line-height:.95;text-align:center;margin:0;letter-spacing:1px;text-transform:uppercase}
+.center{text-align:center}
+.btn,.chip{font-family:inherit;font-weight:700;color:var(--blue);background:var(--org);border:3px solid var(--ink);border-radius:999px;padding:11px 24px;font-size:18px;cursor:pointer;text-transform:uppercase;transition:transform .12s}
+.btn:hover:not(:disabled),.chip:hover:not(:disabled){transform:translateY(-2px);background:#fff}
+.btn:focus-visible,.chip:focus-visible,.opt:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.btn.alt{background:#fff}.btn.sm{padding:6px 14px;font-size:15px}
+button:disabled{opacity:.4;cursor:not-allowed}
+.chip{padding:8px 16px;font-size:17px;background:var(--org2);margin:4px 4px 0 0}
+input{width:100%;font:inherit;color:var(--blue);padding:12px 16px;margin:6px 0 14px;border:3px solid var(--ink);border-radius:18px;background:#fff}
+.grid{display:grid;grid-template-columns:1fr 310px;gap:20px}
+.q{background:var(--org);border:3px solid var(--ink);border-radius:999px;padding:16px 36px;text-align:center;font-size:clamp(18px,2.4vw,26px);text-transform:uppercase;line-height:1.25;margin:14px 0}
+.q small{display:block;font-size:14px;opacity:.8}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;background:var(--org);border:3px solid var(--ink);border-radius:26px;padding:22px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:14px;padding:12px 16px;border:3px solid transparent;border-radius:20px;color:var(--blue);font-weight:700;font-size:19px;min-height:64px}
+.opt i{font-style:normal;flex:none;width:46px;height:46px;border:3px solid var(--blue);border-radius:50%;display:grid;place-items:center;font-size:22px;background:#fff6}
+.opt:hover:not([disabled]){background:#ffffff90;border-color:var(--ink)}
+.opt[disabled]{cursor:default}
+.opt.ok{background:#9be89b;border-color:var(--ink);animation:pop .4s}
+.opt.bad{background:#ff9a9a;border-color:var(--ink);animation:shake .4s}
+.opt.dim{opacity:.4}
+.pill{display:inline-block;background:#fff;border:3px solid var(--ink);border-radius:999px;padding:3px 14px;margin-right:6px;font-size:15px;text-transform:uppercase}
+.result{text-align:center;font-size:30px;padding:12px;border:3px solid var(--ink);border-radius:22px;margin-top:14px;animation:pop .4s}
+.result.ok{background:#9be89b}.result.bad{background:#ff9a9a}
+@keyframes pop{from{transform:scale(.85)}to{transform:none}}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+.bidnow{font-size:46px;line-height:1}
+.row{display:flex;justify-content:space-between;padding:7px 12px;border-radius:14px}
+.row.me{background:var(--org);border:2px solid var(--ink)}
+.bal{font-size:44px}
+ul.rules{list-style:none;padding:0;margin:14px 0;font-size:22px}
+ul.rules li{padding:8px 0}
+.hint{opacity:.8;text-align:center}
+.narrow{max-width:520px;margin:30px auto}
+@media(max-width:860px){.grid,.opts{grid-template-columns:1fr}.q{border-radius:30px;padding:14px 20px}}
+</style></head><body>
+<header><b>💰 Finance Auction</b><div class="top"><span id="status" class="pill">Offline</span><button class="btn sm alt" id="snd" onclick="toggleSound()" aria-label="Toggle sound">🔊</button></div></header>
+<div class="wrap">
+
+<section id="start" style="padding-top:6vh">
+<p class="center" style="letter-spacing:2px">TOPIC 15 · ACCA BT</p>
+<h1 class="big">Finance<br>Auction</h1>
+<p class="center" style="margin-top:34px"><button class="btn" onclick="showJoin()">Let's start!</button></p>
+</section>
+
+<section id="join" class="card narrow hidden">
+<h2>Join the game</h2>
+<label for="room">Room code</label><input id="room" value="FA2026">
+<label for="name">Nickname</label><input id="name" placeholder="Your name">
+<button class="btn" onclick="join()">Join as student</button>
+<button class="btn alt" onclick="host()">Host</button>
+</section>
+
+<section id="rules" class="card narrow hidden">
+<h2 class="center">Game rules</h2>
+<ul class="rules"><li>💰 Start with <b>$1,000</b></li><li>🔨 Max bid: <b>$1,000</b></li><li>✅ Correct answer: <b>+$500</b></li><li>❌ Wrong answer: <b>−$100</b></li><li>📚 <b>10</b> questions, money carries over</li></ul>
+<p class="center"><button class="btn" onclick="ready()">I'm ready!</button></p>
+</section>
+
+<section id="game" class="hidden"><div class="grid"><main>
+<div><span class="pill" id="round"></span><span class="pill" id="phase"></span></div>
+<div class="q" id="question">Waiting for host…</div>
+<div id="answers"></div><div id="result"></div>
+<div class="card white" id="auctionCard" style="margin-top:16px"><h2>🔨 Auction</h2>
+<div>Highest bid</div><div class="bidnow" id="bid">$0</div>
+<div>Highest bidder: <b id="bidder">—</b></div><div id="bidButtons"></div></div>
+<div class="card hidden" id="hostCard"><h2>👨‍🏫 Host controls</h2>
+<button class="btn" onclick="send('open_auction')">Open auction</button>
+<button class="btn alt" onclick="send('sold')">🔨 Sold</button>
+<button class="btn" onclick="send('next_round')">Next round</button>
+<button class="btn alt" onclick="if(confirm('Reset the whole game?'))send('reset')">Reset</button>
+<p class="hint">Answers are graded automatically.</p></div>
+</main><aside>
+<div class="card"><div>Your balance</div><div class="bal" id="balance">$1,000</div><div id="stats"></div></div>
+<div class="card white"><h3>🏆 Leaderboard</h3><div id="players"></div></div>
+</aside></div></section></div>
+<script src="/app.js"></script></body></html>
